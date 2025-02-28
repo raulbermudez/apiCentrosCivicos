@@ -1,26 +1,82 @@
 <?php
-session_start();
-require_once "../bootstrap.php";
+require "../bootstrap.php";
 require_once "../vendor/autoload.php";
 
 use App\Core\Router;
-use App\Controllers\DefaultController;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
-$router = new Router();
+// Ponemos las cabeceras
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Allow: GET, POST, OPTIONS, PUT, DELETE"); 
 
-$router->add([  'name' => 'index',
-                'path' => '/^\/$/',
-                'action' => [DefaultController::class, 'IndexAction']]);     
-
-$request = $_SERVER['REQUEST_URI'];
-$route = $router->match($request);
-
-if($route){
-    $controllerName = $route['action'][0];
-    $actionName = $route['action'][1];
-    $controller = new $controllerName;
-    $controller->$actionName($request);
-}else{
-    echo "No route";
+$method = $_SERVER['REQUEST_METHOD'];
+if($method == "OPTIONS") {
+    die();
 }
-?>
+$request_method = $_SERVER['REQUEST_METHOD'];
+$request = $_SERVER['REQUEST_METHOD'];
+
+$request = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = explode('/', $request);
+
+// Si existe recuperamos el id
+$userId = null;
+if (isset($uri[2])) {
+    $userId = (int) $uri[2];
+}
+
+// if ($request == '/login/'){
+//     $auth = new AuthController($request_method);
+//     if (!$auth->LoginFromRequest()){
+//         exit(http_response_code(401));
+//     }
+// }
+
+// Decodificamos el token
+$input = (array) json_decode(file_get_contents('php://input'), TRUE);
+$authHeader = $_SERVER['HTTP_AUTHORIZATION'];
+$arr = explode(" ", $authHeader);
+$jwt = $arr[1];
+
+if($jwt){
+    try{
+        $decoded = (JWT::decode($jwt, new Key(KEY, 'HS256')));
+    } catch (Exception $e){
+        echo json_encode(array(
+            "message" => "Acceso denegado",
+            "error" => $e->getMessage()
+        ));
+        exit(http_response_code(401));
+    }
+}
+
+
+// Peticion
+// Definimos rutas válidas
+// Tenemos en cuenta que una misma ruta ejecuta distintas acciones
+$router = new Router();
+// $router->add(array(
+//     "name" => "home",
+//     "path" => "/^\/contactos\/([0-9]+)?$/",
+//     "action" => ContactosController::class
+// ));
+
+// $router->add(array(
+//     'name'=>'GetAll',
+//     'path'=>'/^\/contactos$/',
+//     'action'=>ContactosController::class)
+// );
+
+$route = $router->match($request);
+if ($route){
+    $controllerName = $route['action'];
+    $controller = new $controllerName($request_method, $userId);
+    $controller->processRequest();
+} else{
+    $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
+    $response['body'] = null;
+    echo json_encode($response);
+}
