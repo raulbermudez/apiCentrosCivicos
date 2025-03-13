@@ -1,12 +1,24 @@
 <?php
 namespace App\Models;
 
-class CentroCivico extends DBAbstractModel{
+use App\Models\Instalaciones;
+class Centros extends DBAbstractModel{
     private static $instancia;
     private $id;
+    private $nombre;
+    private $direccion;
+    private $telefono;
+    private $horario;
+    private $foto;
     private $instalaciones = [];
     private $actividades = [];
 
+    // Setters
+    public function setId($id){
+        $this->id = $id;
+    }
+
+    // Modelo singleton
     public static function getInstancia()
     {
         if (!isset(self::$instancia)) {
@@ -16,11 +28,10 @@ class CentroCivico extends DBAbstractModel{
         return self::$instancia;
     }
 
-    public function setId($id){
-        $this->id = $id;
+    public function set($data = array()){
+
     }
 
-    // Obtiene un centro civico por su id
     public function get(){
         $this->query = "SELECT * FROM centros_civicos WHERE id = :id";
         $this->parametros['id'] = $this->id;
@@ -49,15 +60,25 @@ class CentroCivico extends DBAbstractModel{
         return $this->rows[0]??null;
     }
 
-    public function set(){}
+    public function edit($id = '', $data = array()){
 
-    public function edit($id="", $data=array()){}
-    
-    public function delete($id=""){}
+    }
 
-    // Obtiene todos los centros civicos
+    public function delete($id= ''){
+
+    }
+
+    // Método que devuelve todos los centros
     public function getAll(){
         $this->query = "SELECT * FROM centros_civicos";
+        $this->get_results_from_query();
+        return $this->rows;
+    }
+
+    // Datos de un centro especifico, solo el centro
+    public function getCentro(){
+        $this->query = "SELECT * FROM centros_civicos WHERE id = :id";
+        $this->parametros['id'] = $this->id;
         $this->get_results_from_query();
         return $this->rows;
     }

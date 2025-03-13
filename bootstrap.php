@@ -1,16 +1,19 @@
-<?php 
-    require 'vendor/autoload.php'; 
-    use Dotenv\Dotenv;
-    
-    $dotenv = Dotenv::createImmutable(__DIR__);
-    $dotenv->load();
+<?php
 
-    define('DBHOST', $_ENV['DBHOST']);
-    define('DBNAME', $_ENV['DBNAME']);
-    define('DBUSER', $_ENV['DBUSER']);
-    define('DBPASS', $_ENV['DBPASS']);
-    define('DBPORT', $_ENV['DBPORT']);
-    define('SMTP_SERVER', $_ENV['SMTP_SERVER']);
-    define('SMTP_USER', $_ENV['SMTP_USER']);
-    define('SMTP_PASS', $_ENV['SMTP_PASS']);
-?>
+require "vendor/autoload.php";
+
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+define("DBHOST", $_ENV['DBHOST']);
+define("DBUSER", $_ENV['DBUSER']);
+define("DBPASS", $_ENV['DBPASS']);
+define("DBNAME", $_ENV['DBNAME']);
+define("DBPORT", $_ENV['DBPORT']);
+define("KEY", $_ENV['KEY']);
+define("BASE_URL", "http://centroscivicos.local/");
+
+ini_set("display_errors", 1);
+ini_Set("display_startup_errors", 1);
+error_reporting(E_ALL);

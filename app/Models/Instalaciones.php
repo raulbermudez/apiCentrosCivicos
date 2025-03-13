@@ -3,9 +3,16 @@ namespace App\Models;
 
 class Instalaciones extends DBAbstractModel{
     private static $instancia;
+    private $id;
     private $id_centro;
+    private $nombre;
+    private $descripcion;
+    private $capacidad_maxima;
 
     // Setters
+    public function setId($id){
+        $this->id = $id;
+    }
     public function setIdCentro($id_centro){
         $this->id_centro = $id_centro;
     }
@@ -25,7 +32,10 @@ class Instalaciones extends DBAbstractModel{
     }
 
     public function get(){
-
+        $this->query = "SELECT * FROM instalaciones WHERE id = :id";
+        $this->parametros['id'] = $this->id;
+        $this->get_results_from_query();
+        return $this->rows;
     }
 
     public function edit($id = '', $data = array()){
@@ -44,9 +54,13 @@ class Instalaciones extends DBAbstractModel{
         return $this->rows;
     }
 
-    // Método que devuelve todas las instalaciones
-    public function getAll(){
+    // Método que devuelve todas las instalaciones (NECESITA FILTRO***************)
+    public function getAll($searchQuery = ''){
         $this->query = "SELECT * FROM instalaciones";
+        if (!empty($searchQuery)) {
+            $this->query = "SELECT * FROM instalaciones WHERE nombre LIKE :searchQuery OR descripcion LIKE :searchQuery";
+            $this->parametros['searchQuery'] = '%' . $searchQuery . '%';
+        }
         $this->get_results_from_query();
         return $this->rows;
     }
